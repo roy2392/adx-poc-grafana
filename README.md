@@ -1,6 +1,27 @@
-# Azure Data Explorer POC with Grafana
+<p align="center">
+  <img src="https://azure.microsoft.com/svghandler/data-explorer/?width=100&height=100" alt="Azure Data Explorer" width="100"/>
+  <img src="https://grafana.com/static/img/menu/grafana2.svg" alt="Grafana" width="100"/>
+</p>
 
-A production-ready POC demonstrating Azure Data Explorer (ADX) analytics with Grafana visualization. Deploy to your Azure subscription with a single command.
+<h1 align="center">Azure Data Explorer POC with Grafana</h1>
+
+<p align="center">
+  <a href="#features"><img src="https://img.shields.io/badge/Terraform-IaC-purple?logo=terraform" alt="Terraform"></a>
+  <a href="#features"><img src="https://img.shields.io/badge/Azure-Data%20Explorer-0078D4?logo=microsoft-azure" alt="Azure"></a>
+  <a href="#features"><img src="https://img.shields.io/badge/Grafana-Dashboard-F46800?logo=grafana" alt="Grafana"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green" alt="License"></a>
+</p>
+
+<p align="center">
+A production-ready POC demonstrating Azure Data Explorer (ADX) analytics with Grafana visualization.<br/>
+Deploy to your Azure subscription with a single command.
+</p>
+
+---
+
+## Dashboard Preview
+
+![ADX Overview Dashboard](assets/dashboard-screenshot.png)
 
 ## Features
 
@@ -22,8 +43,8 @@ A production-ready POC demonstrating Azure Data Explorer (ADX) analytics with Gr
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/adx-poc-dns.git
-cd adx-poc-dns
+git clone https://github.com/roy2392/adx-poc-grafana.git
+cd adx-poc-grafana
 
 # Use the helper script
 ./scripts/deploy.sh check   # Verify prerequisites
@@ -79,8 +100,10 @@ terraform output grafana_url
 ## Project Structure
 
 ```
-adx-poc-dns/
+adx-poc-grafana/
 ├── README.md                    # This file
+├── assets/                      # Images and screenshots
+│   └── dashboard-screenshot.png
 ├── dashboards/                  # Grafana dashboard JSON files
 │   └── adx-overview.json
 ├── docs/                        # Documentation
