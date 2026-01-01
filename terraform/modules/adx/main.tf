@@ -51,83 +51,100 @@ resource "azurerm_kusto_script" "setup_schema" {
 
   script_content = <<-KQL
     // ==============================================================================
-    // IoT Sensors Table - Time-series sensor data
+    // APM SCHEMA - Azure Data Explorer as Datadog/Coralogix Alternative
     // ==============================================================================
-    .create-merge table IoTSensors (
+
+    // ==============================================================================
+    // Traces Table - Distributed Tracing (like Datadog APM)
+    // ==============================================================================
+    .create-merge table Traces (
         Timestamp: datetime,
-        DeviceId: string,
-        Temperature: real,
-        Humidity: real,
-        Pressure: real,
-        Location: string
+        TraceId: string,
+        SpanId: string,
+        ParentSpanId: string,
+        Service: string,
+        Operation: string,
+        Duration: real,
+        Status: string,
+        HttpMethod: string,
+        HttpUrl: string,
+        HttpStatusCode: int,
+        ErrorMessage: string,
+        Tags: dynamic
     )
 
-    // Enable streaming ingestion
-    .alter table IoTSensors policy streamingingestion enable
+    .alter table Traces policy streamingingestion enable
 
-    // Create JSON ingestion mapping
-    .create-or-alter table IoTSensors ingestion json mapping 'IoTSensorsJsonMapping'
+    .create-or-alter table Traces ingestion json mapping 'TracesJsonMapping'
     ```
     [
         {"column": "Timestamp", "path": "$.timestamp", "datatype": "datetime"},
-        {"column": "DeviceId", "path": "$.device_id", "datatype": "string"},
-        {"column": "Temperature", "path": "$.temperature", "datatype": "real"},
-        {"column": "Humidity", "path": "$.humidity", "datatype": "real"},
-        {"column": "Pressure", "path": "$.pressure", "datatype": "real"},
-        {"column": "Location", "path": "$.location", "datatype": "string"}
-    ]
-    ```
-
-    // Create CSV ingestion mapping
-    .create-or-alter table IoTSensors ingestion csv mapping 'IoTSensorsCsvMapping'
-    ```
-    [
-        {"column": "Timestamp", "ordinal": 0, "datatype": "datetime"},
-        {"column": "DeviceId", "ordinal": 1, "datatype": "string"},
-        {"column": "Temperature", "ordinal": 2, "datatype": "real"},
-        {"column": "Humidity", "ordinal": 3, "datatype": "real"},
-        {"column": "Pressure", "ordinal": 4, "datatype": "real"},
-        {"column": "Location", "ordinal": 5, "datatype": "string"}
+        {"column": "TraceId", "path": "$.trace_id", "datatype": "string"},
+        {"column": "SpanId", "path": "$.span_id", "datatype": "string"},
+        {"column": "ParentSpanId", "path": "$.parent_span_id", "datatype": "string"},
+        {"column": "Service", "path": "$.service", "datatype": "string"},
+        {"column": "Operation", "path": "$.operation", "datatype": "string"},
+        {"column": "Duration", "path": "$.duration", "datatype": "real"},
+        {"column": "Status", "path": "$.status", "datatype": "string"},
+        {"column": "HttpMethod", "path": "$.http_method", "datatype": "string"},
+        {"column": "HttpUrl", "path": "$.http_url", "datatype": "string"},
+        {"column": "HttpStatusCode", "path": "$.http_status_code", "datatype": "int"},
+        {"column": "ErrorMessage", "path": "$.error_message", "datatype": "string"},
+        {"column": "Tags", "path": "$.tags", "datatype": "dynamic"}
     ]
     ```
 
     // ==============================================================================
-    // Application Logs Table - Log analytics data
+    // Logs Table - Centralized Logging (like Datadog Logs)
     // ==============================================================================
-    .create-merge table AppLogs (
+    .create-merge table Logs (
         Timestamp: datetime,
         Level: string,
         Service: string,
+        Host: string,
+        Environment: string,
         Message: string,
         TraceId: string,
-        UserId: string,
-        Duration: real
+        SpanId: string,
+        Logger: string,
+        Exception: string,
+        StackTrace: string,
+        Attributes: dynamic
     )
 
-    .alter table AppLogs policy streamingingestion enable
+    .alter table Logs policy streamingingestion enable
 
-    .create-or-alter table AppLogs ingestion json mapping 'AppLogsJsonMapping'
+    .create-or-alter table Logs ingestion json mapping 'LogsJsonMapping'
     ```
     [
         {"column": "Timestamp", "path": "$.timestamp", "datatype": "datetime"},
         {"column": "Level", "path": "$.level", "datatype": "string"},
         {"column": "Service", "path": "$.service", "datatype": "string"},
+        {"column": "Host", "path": "$.host", "datatype": "string"},
+        {"column": "Environment", "path": "$.environment", "datatype": "string"},
         {"column": "Message", "path": "$.message", "datatype": "string"},
         {"column": "TraceId", "path": "$.trace_id", "datatype": "string"},
-        {"column": "UserId", "path": "$.user_id", "datatype": "string"},
-        {"column": "Duration", "path": "$.duration", "datatype": "real"}
+        {"column": "SpanId", "path": "$.span_id", "datatype": "string"},
+        {"column": "Logger", "path": "$.logger", "datatype": "string"},
+        {"column": "Exception", "path": "$.exception", "datatype": "string"},
+        {"column": "StackTrace", "path": "$.stack_trace", "datatype": "string"},
+        {"column": "Attributes", "path": "$.attributes", "datatype": "dynamic"}
     ]
     ```
 
     // ==============================================================================
-    // Metrics Table - Generic metrics data
+    // Metrics Table - Infrastructure & Custom Metrics (like Datadog Metrics)
     // ==============================================================================
     .create-merge table Metrics (
         Timestamp: datetime,
         MetricName: string,
         Value: real,
+        MetricType: string,
+        Service: string,
+        Host: string,
+        Environment: string,
         Unit: string,
-        Dimensions: dynamic
+        Tags: dynamic
     )
 
     .alter table Metrics policy streamingingestion enable
@@ -138,83 +155,198 @@ resource "azurerm_kusto_script" "setup_schema" {
         {"column": "Timestamp", "path": "$.timestamp", "datatype": "datetime"},
         {"column": "MetricName", "path": "$.metric_name", "datatype": "string"},
         {"column": "Value", "path": "$.value", "datatype": "real"},
+        {"column": "MetricType", "path": "$.metric_type", "datatype": "string"},
+        {"column": "Service", "path": "$.service", "datatype": "string"},
+        {"column": "Host", "path": "$.host", "datatype": "string"},
+        {"column": "Environment", "path": "$.environment", "datatype": "string"},
         {"column": "Unit", "path": "$.unit", "datatype": "string"},
-        {"column": "Dimensions", "path": "$.dimensions", "datatype": "dynamic"}
+        {"column": "Tags", "path": "$.tags", "datatype": "dynamic"}
     ]
     ```
 
     // ==============================================================================
-    // Stored Functions for Common Queries
+    // Errors Table - Error Tracking (like Datadog Error Tracking)
+    // ==============================================================================
+    .create-merge table Errors (
+        Timestamp: datetime,
+        ErrorId: string,
+        Service: string,
+        Host: string,
+        Environment: string,
+        ErrorType: string,
+        ErrorMessage: string,
+        StackTrace: string,
+        TraceId: string,
+        UserId: string,
+        RequestUrl: string,
+        Fingerprint: string,
+        Count: int,
+        Attributes: dynamic
+    )
+
+    .alter table Errors policy streamingingestion enable
+
+    .create-or-alter table Errors ingestion json mapping 'ErrorsJsonMapping'
+    ```
+    [
+        {"column": "Timestamp", "path": "$.timestamp", "datatype": "datetime"},
+        {"column": "ErrorId", "path": "$.error_id", "datatype": "string"},
+        {"column": "Service", "path": "$.service", "datatype": "string"},
+        {"column": "Host", "path": "$.host", "datatype": "string"},
+        {"column": "Environment", "path": "$.environment", "datatype": "string"},
+        {"column": "ErrorType", "path": "$.error_type", "datatype": "string"},
+        {"column": "ErrorMessage", "path": "$.error_message", "datatype": "string"},
+        {"column": "StackTrace", "path": "$.stack_trace", "datatype": "string"},
+        {"column": "TraceId", "path": "$.trace_id", "datatype": "string"},
+        {"column": "UserId", "path": "$.user_id", "datatype": "string"},
+        {"column": "RequestUrl", "path": "$.request_url", "datatype": "string"},
+        {"column": "Fingerprint", "path": "$.fingerprint", "datatype": "string"},
+        {"column": "Count", "path": "$.count", "datatype": "int"},
+        {"column": "Attributes", "path": "$.attributes", "datatype": "dynamic"}
+    ]
+    ```
+
+    // ==============================================================================
+    // ServiceMap Table - Service Dependencies
+    // ==============================================================================
+    .create-merge table ServiceMap (
+        Timestamp: datetime,
+        SourceService: string,
+        DestinationService: string,
+        Protocol: string,
+        RequestCount: long,
+        ErrorCount: long,
+        AvgLatency: real,
+        P99Latency: real
+    )
+
+    .alter table ServiceMap policy streamingingestion enable
+
+    .create-or-alter table ServiceMap ingestion json mapping 'ServiceMapJsonMapping'
+    ```
+    [
+        {"column": "Timestamp", "path": "$.timestamp", "datatype": "datetime"},
+        {"column": "SourceService", "path": "$.source_service", "datatype": "string"},
+        {"column": "DestinationService", "path": "$.destination_service", "datatype": "string"},
+        {"column": "Protocol", "path": "$.protocol", "datatype": "string"},
+        {"column": "RequestCount", "path": "$.request_count", "datatype": "long"},
+        {"column": "ErrorCount", "path": "$.error_count", "datatype": "long"},
+        {"column": "AvgLatency", "path": "$.avg_latency", "datatype": "real"},
+        {"column": "P99Latency", "path": "$.p99_latency", "datatype": "real"}
+    ]
+    ```
+
+    // ==============================================================================
+    // APM Stored Functions - Pre-built Analytics
     // ==============================================================================
 
-    // Get average sensor readings by device (last hour)
-    .create-or-alter function with (docstring = "Average sensor readings by device for the last hour")
-    AvgSensorsByDevice() {
-        IoTSensors
-        | where Timestamp > ago(1h)
+    // Service Health Overview
+    .create-or-alter function with (docstring = "Service health overview with error rates and latency")
+    ServiceHealth(timeRange: timespan) {
+        Traces
+        | where Timestamp > ago(timeRange)
         | summarize
-            AvgTemperature = round(avg(Temperature), 2),
-            AvgHumidity = round(avg(Humidity), 2),
-            AvgPressure = round(avg(Pressure), 2),
-            ReadingCount = count()
-            by DeviceId, Location
-        | order by AvgTemperature desc
-    }
-
-    // Get error rate by service
-    .create-or-alter function with (docstring = "Error rate by service for the last hour")
-    ErrorRateByService() {
-        AppLogs
-        | where Timestamp > ago(1h)
-        | summarize
-            TotalLogs = count(),
-            Errors = countif(Level == "Error"),
-            Warnings = countif(Level == "Warning")
+            RequestCount = count(),
+            ErrorCount = countif(Status == "error"),
+            AvgLatency = round(avg(Duration), 2),
+            P50Latency = round(percentile(Duration, 50), 2),
+            P95Latency = round(percentile(Duration, 95), 2),
+            P99Latency = round(percentile(Duration, 99), 2)
             by Service
-        | extend
-            ErrorRate = round(100.0 * Errors / TotalLogs, 2),
-            WarningRate = round(100.0 * Warnings / TotalLogs, 2)
+        | extend ErrorRate = round(100.0 * ErrorCount / RequestCount, 2)
         | order by ErrorRate desc
     }
 
-    // Get sensor readings time series for a device
-    .create-or-alter function with (docstring = "Sensor time series for a specific device")
-    SensorTimeSeries(deviceId: string, timeRange: timespan) {
-        IoTSensors
-        | where Timestamp > ago(timeRange) and DeviceId == deviceId
+    // Request throughput by service
+    .create-or-alter function with (docstring = "Request throughput per minute by service")
+    RequestThroughput(timeRange: timespan) {
+        Traces
+        | where Timestamp > ago(timeRange)
+        | summarize Requests = count() by bin(Timestamp, 1m), Service
+        | order by Timestamp asc
+    }
+
+    // Latency percentiles over time
+    .create-or-alter function with (docstring = "Latency percentiles over time")
+    LatencyTrend(serviceName: string, timeRange: timespan) {
+        Traces
+        | where Timestamp > ago(timeRange) and Service == serviceName
         | summarize
-            AvgTemp = avg(Temperature),
-            MinTemp = min(Temperature),
-            MaxTemp = max(Temperature)
+            P50 = round(percentile(Duration, 50), 2),
+            P95 = round(percentile(Duration, 95), 2),
+            P99 = round(percentile(Duration, 99), 2)
             by bin(Timestamp, 1m)
         | order by Timestamp asc
     }
 
-    // Get metrics summary with percentiles
-    .create-or-alter function with (docstring = "Metrics summary with percentiles")
-    MetricsSummary(metricName: string, timeRange: timespan) {
-        Metrics
-        | where Timestamp > ago(timeRange) and MetricName == metricName
+    // Error breakdown by type and service
+    .create-or-alter function with (docstring = "Error breakdown by type and service")
+    ErrorBreakdown(timeRange: timespan) {
+        Errors
+        | where Timestamp > ago(timeRange)
         | summarize
-            Avg = round(avg(Value), 2),
-            Min = min(Value),
-            Max = max(Value),
-            P50 = percentile(Value, 50),
-            P95 = percentile(Value, 95),
-            P99 = percentile(Value, 99),
-            Count = count()
-            by bin(Timestamp, 5m)
+            OccurrenceCount = count(),
+            AffectedUsers = dcount(UserId)
+            by Service, ErrorType, ErrorMessage
+        | order by OccurrenceCount desc
+    }
+
+    // Log volume by level
+    .create-or-alter function with (docstring = "Log volume by level over time")
+    LogVolume(timeRange: timespan) {
+        Logs
+        | where Timestamp > ago(timeRange)
+        | summarize Count = count() by bin(Timestamp, 1m), Level
         | order by Timestamp asc
     }
 
-    // Get recent logs with filtering
-    .create-or-alter function with (docstring = "Recent logs with optional level filter")
-    RecentLogs(level: string, limit: int) {
-        AppLogs
-        | where Timestamp > ago(1h)
-        | where isempty(level) or Level == level
+    // Trace search
+    .create-or-alter function with (docstring = "Search traces by service and status")
+    TraceSearch(serviceName: string, status: string, limit: int) {
+        Traces
+        | where (isempty(serviceName) or Service == serviceName)
+        | where (isempty(status) or Status == status)
         | order by Timestamp desc
         | take limit
+        | project Timestamp, TraceId, Service, Operation, Duration, Status, HttpStatusCode
+    }
+
+    // Slow requests analysis
+    .create-or-alter function with (docstring = "Find slow requests above threshold")
+    SlowRequests(thresholdMs: real, timeRange: timespan) {
+        Traces
+        | where Timestamp > ago(timeRange) and Duration > thresholdMs
+        | project Timestamp, TraceId, Service, Operation, Duration, HttpUrl
+        | order by Duration desc
+        | take 100
+    }
+
+    // Service dependency map
+    .create-or-alter function with (docstring = "Service dependency map with health")
+    DependencyMap(timeRange: timespan) {
+        ServiceMap
+        | where Timestamp > ago(timeRange)
+        | summarize
+            TotalRequests = sum(RequestCount),
+            TotalErrors = sum(ErrorCount),
+            AvgLatency = round(avg(AvgLatency), 2)
+            by SourceService, DestinationService
+        | extend ErrorRate = round(100.0 * TotalErrors / TotalRequests, 2)
+    }
+
+    // Apdex score calculation
+    .create-or-alter function with (docstring = "Calculate Apdex score for services")
+    ApdexScore(satisfiedThreshold: real, toleratingThreshold: real, timeRange: timespan) {
+        Traces
+        | where Timestamp > ago(timeRange)
+        | summarize
+            Satisfied = countif(Duration <= satisfiedThreshold),
+            Tolerating = countif(Duration > satisfiedThreshold and Duration <= toleratingThreshold),
+            Frustrated = countif(Duration > toleratingThreshold),
+            Total = count()
+            by Service
+        | extend Apdex = round((todouble(Satisfied) + (todouble(Tolerating) / 2.0)) / todouble(Total), 2)
+        | project Service, Apdex, Satisfied, Tolerating, Frustrated, Total
     }
   KQL
 }

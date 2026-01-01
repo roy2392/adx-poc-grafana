@@ -1,0 +1,294 @@
+{
+  "apiVersion": 1,
+  "groups": [
+    {
+      "name": "APM Alerts",
+      "folder": "APM",
+      "interval": "1m",
+      "rules": [
+        {
+          "uid": "high-error-rate",
+          "title": "High Error Rate",
+          "condition": "C",
+          "data": [
+            {
+              "refId": "A",
+              "queryType": "",
+              "relativeTimeRange": { "from": 300, "to": 0 },
+              "datasourceUid": "${datasource}",
+              "model": {
+                "query": "Traces\n| where Timestamp > ago(5m)\n| summarize ErrorRate = round(100.0 * countif(Status == \"error\") / count(), 2)",
+                "refId": "A"
+              }
+            },
+            {
+              "refId": "C",
+              "queryType": "",
+              "relativeTimeRange": { "from": 300, "to": 0 },
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": { "params": [5], "type": "gt" },
+                    "operator": { "type": "and" },
+                    "query": { "params": ["A"] },
+                    "reducer": { "params": [], "type": "last" },
+                    "type": "query"
+                  }
+                ],
+                "refId": "C",
+                "type": "classic_conditions"
+              }
+            }
+          ],
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "for": "5m",
+          "annotations": {
+            "description": "Error rate has exceeded 5% in the last 5 minutes. Current value: {{ $values.A }}%",
+            "summary": "High error rate detected across services"
+          },
+          "labels": {
+            "severity": "critical",
+            "team": "platform"
+          }
+        },
+        {
+          "uid": "high-p99-latency",
+          "title": "High P99 Latency",
+          "condition": "C",
+          "data": [
+            {
+              "refId": "A",
+              "queryType": "",
+              "relativeTimeRange": { "from": 300, "to": 0 },
+              "datasourceUid": "${datasource}",
+              "model": {
+                "query": "Traces\n| where Timestamp > ago(5m)\n| summarize P99 = round(percentile(Duration, 99), 2)",
+                "refId": "A"
+              }
+            },
+            {
+              "refId": "C",
+              "queryType": "",
+              "relativeTimeRange": { "from": 300, "to": 0 },
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": { "params": [1000], "type": "gt" },
+                    "operator": { "type": "and" },
+                    "query": { "params": ["A"] },
+                    "reducer": { "params": [], "type": "last" },
+                    "type": "query"
+                  }
+                ],
+                "refId": "C",
+                "type": "classic_conditions"
+              }
+            }
+          ],
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "for": "5m",
+          "annotations": {
+            "description": "P99 latency has exceeded 1000ms. Current value: {{ $values.A }}ms",
+            "summary": "High latency detected - response times degraded"
+          },
+          "labels": {
+            "severity": "warning",
+            "team": "platform"
+          }
+        },
+        {
+          "uid": "low-apdex-score",
+          "title": "Low Apdex Score",
+          "condition": "C",
+          "data": [
+            {
+              "refId": "A",
+              "queryType": "",
+              "relativeTimeRange": { "from": 300, "to": 0 },
+              "datasourceUid": "${datasource}",
+              "model": {
+                "query": "Traces\n| where Timestamp > ago(5m)\n| summarize\n    Satisfied = countif(Duration <= 100),\n    Tolerating = countif(Duration > 100 and Duration <= 400),\n    Total = count()\n| extend Apdex = round((todouble(Satisfied) + (todouble(Tolerating) / 2.0)) / todouble(Total), 2)",
+                "refId": "A"
+              }
+            },
+            {
+              "refId": "C",
+              "queryType": "",
+              "relativeTimeRange": { "from": 300, "to": 0 },
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": { "params": [0.7], "type": "lt" },
+                    "operator": { "type": "and" },
+                    "query": { "params": ["A"] },
+                    "reducer": { "params": [], "type": "last" },
+                    "type": "query"
+                  }
+                ],
+                "refId": "C",
+                "type": "classic_conditions"
+              }
+            }
+          ],
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "for": "10m",
+          "annotations": {
+            "description": "Apdex score has dropped below 0.7 indicating poor user experience. Current value: {{ $values.A }}",
+            "summary": "User experience degraded - low Apdex score"
+          },
+          "labels": {
+            "severity": "warning",
+            "team": "platform"
+          }
+        },
+        {
+          "uid": "high-cpu-usage",
+          "title": "High CPU Usage",
+          "condition": "C",
+          "data": [
+            {
+              "refId": "A",
+              "queryType": "",
+              "relativeTimeRange": { "from": 300, "to": 0 },
+              "datasourceUid": "${datasource}",
+              "model": {
+                "query": "Metrics\n| where Timestamp > ago(5m) and MetricName == \"cpu.usage\"\n| summarize AvgCPU = round(avg(Value), 2) by Service\n| where AvgCPU > 80\n| project Service, AvgCPU",
+                "refId": "A"
+              }
+            },
+            {
+              "refId": "C",
+              "queryType": "",
+              "relativeTimeRange": { "from": 300, "to": 0 },
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": { "params": [0], "type": "gt" },
+                    "operator": { "type": "and" },
+                    "query": { "params": ["A"] },
+                    "reducer": { "params": [], "type": "count" },
+                    "type": "query"
+                  }
+                ],
+                "refId": "C",
+                "type": "classic_conditions"
+              }
+            }
+          ],
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "for": "5m",
+          "annotations": {
+            "description": "One or more services have CPU usage above 80%",
+            "summary": "High CPU usage detected"
+          },
+          "labels": {
+            "severity": "warning",
+            "team": "infrastructure"
+          }
+        },
+        {
+          "uid": "high-memory-usage",
+          "title": "High Memory Usage",
+          "condition": "C",
+          "data": [
+            {
+              "refId": "A",
+              "queryType": "",
+              "relativeTimeRange": { "from": 300, "to": 0 },
+              "datasourceUid": "${datasource}",
+              "model": {
+                "query": "Metrics\n| where Timestamp > ago(5m) and MetricName == \"memory.usage\"\n| summarize AvgMemory = round(avg(Value), 2) by Service\n| where AvgMemory > 85\n| project Service, AvgMemory",
+                "refId": "A"
+              }
+            },
+            {
+              "refId": "C",
+              "queryType": "",
+              "relativeTimeRange": { "from": 300, "to": 0 },
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": { "params": [0], "type": "gt" },
+                    "operator": { "type": "and" },
+                    "query": { "params": ["A"] },
+                    "reducer": { "params": [], "type": "count" },
+                    "type": "query"
+                  }
+                ],
+                "refId": "C",
+                "type": "classic_conditions"
+              }
+            }
+          ],
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "for": "5m",
+          "annotations": {
+            "description": "One or more services have memory usage above 85%",
+            "summary": "High memory usage detected"
+          },
+          "labels": {
+            "severity": "warning",
+            "team": "infrastructure"
+          }
+        },
+        {
+          "uid": "error-spike",
+          "title": "Error Spike Detected",
+          "condition": "C",
+          "data": [
+            {
+              "refId": "A",
+              "queryType": "",
+              "relativeTimeRange": { "from": 300, "to": 0 },
+              "datasourceUid": "${datasource}",
+              "model": {
+                "query": "Errors\n| where Timestamp > ago(5m)\n| summarize ErrorCount = count()",
+                "refId": "A"
+              }
+            },
+            {
+              "refId": "C",
+              "queryType": "",
+              "relativeTimeRange": { "from": 300, "to": 0 },
+              "datasourceUid": "__expr__",
+              "model": {
+                "conditions": [
+                  {
+                    "evaluator": { "params": [10], "type": "gt" },
+                    "operator": { "type": "and" },
+                    "query": { "params": ["A"] },
+                    "reducer": { "params": [], "type": "last" },
+                    "type": "query"
+                  }
+                ],
+                "refId": "C",
+                "type": "classic_conditions"
+              }
+            }
+          ],
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "for": "2m",
+          "annotations": {
+            "description": "More than 10 unique errors detected in the last 5 minutes. Count: {{ $values.A }}",
+            "summary": "Spike in application errors"
+          },
+          "labels": {
+            "severity": "critical",
+            "team": "platform"
+          }
+        }
+      ]
+    }
+  ]
+}

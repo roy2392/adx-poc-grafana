@@ -96,9 +96,9 @@ destroy() {
     fi
 }
 
-# Ingest sample data
+# Ingest sample APM data
 ingest_sample_data() {
-    print_info "Ingesting sample data..."
+    print_info "Ingesting sample APM data..."
 
     cd "$TERRAFORM_DIR"
 
@@ -113,35 +113,59 @@ ingest_sample_data() {
         exit 1
     fi
 
-    print_info "Uploading sample data to storage..."
+    # Generate fresh APM data
+    print_info "Generating fresh APM sample data..."
+    cd "$ROOT_DIR"
+    python3 scripts/generate-apm-data.py
 
-    # Upload IoT sensor data
-    az storage blob upload \
+    print_info "Uploading APM data to storage..."
+
+    # Create container if not exists
+    az storage container create \
         --account-name "$STORAGE_ACCOUNT" \
-        --container-name "sample-data" \
-        --name "iot-sensors.json" \
-        --file "$ROOT_DIR/sample-data/iot-sensors.json" \
-        --overwrite
+        --name "sample-data" \
+        --auth-mode login 2>/dev/null || true
 
-    # Upload app logs
-    az storage blob upload \
-        --account-name "$STORAGE_ACCOUNT" \
-        --container-name "sample-data" \
-        --name "app-logs.json" \
-        --file "$ROOT_DIR/sample-data/app-logs.json" \
-        --overwrite
+    # Upload all APM data files
+    for file in traces.json logs.json metrics.json errors.json service-map.json; do
+        print_info "Uploading $file..."
+        az storage blob upload \
+            --account-name "$STORAGE_ACCOUNT" \
+            --container-name "sample-data" \
+            --name "$file" \
+            --file "$ROOT_DIR/sample-data/$file" \
+            --overwrite \
+            --auth-mode login
+    done
 
-    print_info "Sample data uploaded!"
+    print_info "Sample APM data uploaded!"
     print_info ""
     print_info "To ingest data into ADX, run the following KQL commands in the ADX Web UI:"
     print_info ""
-    echo ".ingest into table IoTSensors ("
-    echo "  h'https://${STORAGE_ACCOUNT}.blob.core.windows.net/sample-data/iot-sensors.json'"
-    echo ") with (format='multijson', ingestionMappingReference='IoTSensorsJsonMapping')"
+    echo "// Ingest Traces"
+    echo ".ingest into table Traces ("
+    echo "  h'https://${STORAGE_ACCOUNT}.blob.core.windows.net/sample-data/traces.json'"
+    echo ") with (format='multijson', ingestionMappingReference='TracesJsonMapping')"
     echo ""
-    echo ".ingest into table AppLogs ("
-    echo "  h'https://${STORAGE_ACCOUNT}.blob.core.windows.net/sample-data/app-logs.json'"
-    echo ") with (format='multijson', ingestionMappingReference='AppLogsJsonMapping')"
+    echo "// Ingest Logs"
+    echo ".ingest into table Logs ("
+    echo "  h'https://${STORAGE_ACCOUNT}.blob.core.windows.net/sample-data/logs.json'"
+    echo ") with (format='multijson', ingestionMappingReference='LogsJsonMapping')"
+    echo ""
+    echo "// Ingest Metrics"
+    echo ".ingest into table Metrics ("
+    echo "  h'https://${STORAGE_ACCOUNT}.blob.core.windows.net/sample-data/metrics.json'"
+    echo ") with (format='multijson', ingestionMappingReference='MetricsJsonMapping')"
+    echo ""
+    echo "// Ingest Errors"
+    echo ".ingest into table Errors ("
+    echo "  h'https://${STORAGE_ACCOUNT}.blob.core.windows.net/sample-data/errors.json'"
+    echo ") with (format='multijson', ingestionMappingReference='ErrorsJsonMapping')"
+    echo ""
+    echo "// Ingest ServiceMap"
+    echo ".ingest into table ServiceMap ("
+    echo "  h'https://${STORAGE_ACCOUNT}.blob.core.windows.net/sample-data/service-map.json'"
+    echo ") with (format='multijson', ingestionMappingReference='ServiceMapJsonMapping')"
 }
 
 # Show outputs

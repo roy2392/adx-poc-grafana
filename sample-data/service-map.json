@@ -1,0 +1,82 @@
+[
+  {
+    "timestamp": "2026-01-01T11:11:51.041780Z",
+    "source_service": "api-gateway",
+    "destination_service": "user-service",
+    "protocol": "http",
+    "request_count": 3589,
+    "error_count": 156,
+    "avg_latency": 127.98,
+    "p99_latency": 788.72
+  },
+  {
+    "timestamp": "2026-01-01T11:33:51.041780Z",
+    "source_service": "api-gateway",
+    "destination_service": "order-service",
+    "protocol": "http",
+    "request_count": 4569,
+    "error_count": 161,
+    "avg_latency": 25.99,
+    "p99_latency": 403.31
+  },
+  {
+    "timestamp": "2026-01-01T11:04:51.041780Z",
+    "source_service": "api-gateway",
+    "destination_service": "analytics-service",
+    "protocol": "http",
+    "request_count": 9363,
+    "error_count": 60,
+    "avg_latency": 28.02,
+    "p99_latency": 875.29
+  },
+  {
+    "timestamp": "2026-01-01T11:14:51.041780Z",
+    "source_service": "user-service",
+    "destination_service": "notification-service",
+    "protocol": "http",
+    "request_count": 4035,
+    "error_count": 24,
+    "avg_latency": 19.66,
+    "p99_latency": 618.33
+  },
+  {
+    "timestamp": "2026-01-01T11:03:51.041780Z",
+    "source_service": "order-service",
+    "destination_service": "payment-service",
+    "protocol": "http",
+    "request_count": 3673,
+    "error_count": 89,
+    "avg_latency": 41.37,
+    "p99_latency": 554.94
+  },
+  {
+    "timestamp": "2026-01-01T11:18:51.041780Z",
+    "source_service": "order-service",
+    "destination_service": "inventory-service",
+    "protocol": "http",
+    "request_count": 8874,
+    "error_count": 94,
+    "avg_latency": 108.0,
+    "p99_latency": 956.59
+  },
+  {
+    "timestamp": "2026-01-01T11:53:51.041780Z",
+    "source_service": "order-service",
+    "destination_service": "notification-service",
+    "protocol": "http",
+    "request_count": 9875,
+    "error_count": 136,
+    "avg_latency": 59.81,
+    "p99_latency": 480.55
+  },
+  {
+    "timestamp": "2026-01-01T11:58:51.041780Z",
+    "source_service": "payment-service",
+    "destination_service": "notification-service",
+    "protocol": "http",
+    "request_count": 7839,
+    "error_count": 130,
+    "avg_latency": 28.75,
+    "p99_latency": 220.7
+  }
+]
