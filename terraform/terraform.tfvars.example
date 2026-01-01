@@ -1,0 +1,69 @@
+# Azure Data Explorer POC - Terraform Configuration
+# Copy this file to terraform.tfvars and update values
+
+# ==============================================================================
+# REQUIRED VARIABLES
+# ==============================================================================
+
+# Grafana admin password (must be secure)
+grafana_admin_password = "CHANGE_ME_SecurePassword123!"
+
+# ==============================================================================
+# OPTIONAL VARIABLES - Uncomment and modify as needed
+# ==============================================================================
+
+# Resource Group
+# resource_group_name = "rg-adx-poc"
+
+# Azure Region (choose closest to your users)
+# Options: eastus, westus2, westeurope, northeurope, australiaeast, etc.
+# location = "eastus"
+
+# Environment tag
+# environment = "dev"
+
+# ADX Cluster Configuration
+# Cluster name (leave empty for auto-generated name)
+# adx_cluster_name = ""
+
+# ADX SKU - Choose based on your needs:
+# - Dev(No SLA)_Standard_D11_v2  : Cheapest, for POC/dev only (~$150/month)
+# - Dev(No SLA)_Standard_E2a_v4  : Dev tier with AMD (~$130/month)
+# - Standard_D11_v2              : Production tier (~$300/month)
+# - Standard_D13_v2              : Higher performance (~$600/month)
+# adx_sku_name = "Dev(No SLA)_Standard_D11_v2"
+
+# Number of cluster instances (1 for dev, 2+ for production)
+# adx_capacity = 1
+
+# Database name
+# adx_database_name = "analytics"
+
+# Grafana container image
+# grafana_image = "grafana/grafana-oss:10.2.0"
+
+# ==============================================================================
+# NETWORKING OPTIONS
+# ==============================================================================
+
+# Enable private networking (VNet integration)
+# Set to true for production environments
+# enable_private_network = false
+
+# IP ranges allowed to access ADX (CIDR format)
+# Example: ["203.0.113.0/24", "198.51.100.50/32"]
+# Leave empty to allow all Azure services (default)
+# allowed_ip_ranges = []
+
+# ==============================================================================
+# TAGS
+# ==============================================================================
+
+# Tags applied to all resources
+# tags = {
+#   Project     = "ADX-POC"
+#   Environment = "Development"
+#   Owner       = "your-team"
+#   CostCenter  = "12345"
+#   ManagedBy   = "Terraform"
+# }

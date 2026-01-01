@@ -1,0 +1,15 @@
+{"timestamp": "2024-01-15T10:00:01Z", "level": "Info", "service": "api-gateway", "message": "Request received: GET /api/v1/users", "trace_id": "abc123", "user_id": "user-001", "duration": 45.2}
+{"timestamp": "2024-01-15T10:00:02Z", "level": "Info", "service": "user-service", "message": "Fetching user data from cache", "trace_id": "abc123", "user_id": "user-001", "duration": 12.5}
+{"timestamp": "2024-01-15T10:00:03Z", "level": "Info", "service": "api-gateway", "message": "Response sent: 200 OK", "trace_id": "abc123", "user_id": "user-001", "duration": 58.3}
+{"timestamp": "2024-01-15T10:00:15Z", "level": "Warning", "service": "auth-service", "message": "Token expiring soon for user", "trace_id": "def456", "user_id": "user-002", "duration": 5.1}
+{"timestamp": "2024-01-15T10:00:20Z", "level": "Error", "service": "payment-service", "message": "Failed to process payment: timeout", "trace_id": "ghi789", "user_id": "user-003", "duration": 30000.0}
+{"timestamp": "2024-01-15T10:00:25Z", "level": "Info", "service": "notification-service", "message": "Email notification queued", "trace_id": "jkl012", "user_id": "user-001", "duration": 8.7}
+{"timestamp": "2024-01-15T10:00:30Z", "level": "Info", "service": "api-gateway", "message": "Request received: POST /api/v1/orders", "trace_id": "mno345", "user_id": "user-004", "duration": 120.5}
+{"timestamp": "2024-01-15T10:00:35Z", "level": "Info", "service": "order-service", "message": "Order created successfully", "trace_id": "mno345", "user_id": "user-004", "duration": 89.2}
+{"timestamp": "2024-01-15T10:00:40Z", "level": "Error", "service": "inventory-service", "message": "Stock check failed: database connection error", "trace_id": "pqr678", "user_id": "user-005", "duration": 5000.0}
+{"timestamp": "2024-01-15T10:00:45Z", "level": "Warning", "service": "cache-service", "message": "Cache miss rate above threshold", "trace_id": "stu901", "user_id": "", "duration": 2.3}
+{"timestamp": "2024-01-15T10:00:50Z", "level": "Info", "service": "api-gateway", "message": "Health check passed", "trace_id": "vwx234", "user_id": "", "duration": 1.5}
+{"timestamp": "2024-01-15T10:00:55Z", "level": "Info", "service": "user-service", "message": "User profile updated", "trace_id": "yza567", "user_id": "user-006", "duration": 35.8}
+{"timestamp": "2024-01-15T10:01:00Z", "level": "Info", "service": "api-gateway", "message": "Request received: GET /api/v1/products", "trace_id": "bcd890", "user_id": "user-007", "duration": 78.4}
+{"timestamp": "2024-01-15T10:01:05Z", "level": "Error", "service": "search-service", "message": "Elasticsearch cluster unavailable", "trace_id": "efg123", "user_id": "user-008", "duration": 10000.0}
+{"timestamp": "2024-01-15T10:01:10Z", "level": "Info", "service": "metrics-service", "message": "Metrics batch processed", "trace_id": "hij456", "user_id": "", "duration": 156.7}
